@@ -15,4 +15,8 @@ if(TARGET lte)
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/simulte)
 endif()
 
+if(TARGET lte AND WITH_STORYBOARD)
+    add_subdirectory(lte-blackice)
+endif()
+
 add_opp_run(car2car-grid WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/car2car-grid)
