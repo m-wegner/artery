@@ -1,6 +1,8 @@
 #include "artery/inet/VanetRx.h"
 #include <cstdint>
 
+using namespace omnetpp;
+
 Define_Module(VanetRx)
 
 const simsignal_t VanetRx::ChannelLoadSignal = cComponent::registerSignal("ChannelLoad");

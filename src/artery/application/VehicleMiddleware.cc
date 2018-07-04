@@ -7,8 +7,11 @@
 #include "artery/application/VehicleMiddleware.h"
 #include "artery/traci/ControllableVehicle.h"
 #include "artery/traci/MobilityBase.h"
+#include "inet/common/InitStages.h"
 #include "inet/common/ModuleAccess.h"
 #include <vanetza/common/position_fix.hpp>
+
+using namespace omnetpp;
 
 namespace artery
 {
@@ -17,12 +20,15 @@ Define_Module(VehicleMiddleware)
 
 void VehicleMiddleware::initialize(int stage)
 {
-	if (stage == 0) {
-		findHost()->subscribe(MobilityBase::stateChangedSignal, this);
-		getFacilities().register_const(&mVehicleDataProvider);
+	if (stage == inet::INITSTAGE_LOCAL) {
 		initializeVehicleController();
-	} else if (stage == 1) {
+		getFacilities().register_const(&mVehicleDataProvider);
+		findHost()->subscribe(MobilityBase::stateChangedSignal, this);
+	}
+	else if (stage == inet::INITSTAGE_PHYSICAL_ENVIRONMENT_2) {
 		mVehicleDataProvider.update(mVehicleController);
+	}
+	else if (stage == inet::INITSTAGE_NETWORK_LAYER_2) {
 		updatePosition();
 	}
 

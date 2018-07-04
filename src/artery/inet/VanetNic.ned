@@ -1,16 +1,15 @@
 package artery.inet;
 
-import inet.linklayer.ieee80211.Ieee80211Nic;
+import inet.linklayer.ieee80211.Ieee80211Interface;
 
-module VanetNic extends Ieee80211Nic
+module VanetNic extends Ieee80211Interface
 {
     parameters:
-        macType = "Ieee80211Mac";
-        mgmtType = "Ieee80211MgmtAdhoc";
+        mgmt.typename = "Ieee80211MgmtAdhoc";
+        agent.typename = "";
         opMode = "p";
         bitrate = default(6 Mbps);
 
-        mac.modeSet = opMode;
         mac.qosStation = true;
         mac.rx.typename = "VanetRx";
 

@@ -25,6 +25,7 @@
 #include "artery/nic/RadioDriverBase.h"
 #include "artery/utility/IdentityRegistry.h"
 #include "artery/utility/FilterRules.h"
+#include "inet/common/InitStages.h"
 #include "inet/common/ModuleAccess.h"
 #include <vanetza/btp/header.hpp>
 #include <vanetza/btp/header_conversion.hpp>
@@ -39,6 +40,8 @@
 #include <algorithm>
 #include <chrono>
 #include <string>
+
+using namespace omnetpp;
 
 namespace artery
 {
@@ -56,7 +59,7 @@ void Middleware::request(const vanetza::access::DataRequest& req,
 {
 	Enter_Method_Silent();
 	if ((*payload)[vanetza::OsiLayer::Network].ptr() == nullptr) {
-		throw cRuntimeError("Missing network layer payload in middleware request");
+		error("Missing network layer payload in middleware request");
 	}
 
 	GeoNetPacket* net = new GeoNetPacket("GeoNet packet");
@@ -91,7 +94,7 @@ void Middleware::request(const vanetza::btp::DataRequestB& req, std::unique_ptr<
 		}
 			break;
 		default:
-			throw cRuntimeError("Unknown or unimplemented transport type");
+			error("Unknown or unimplemented transport type");
 			break;
 	}
 
@@ -104,27 +107,20 @@ void Middleware::request(const vanetza::btp::DataRequestB& req, std::unique_ptr<
 
 int Middleware::numInitStages() const
 {
-	return 3;
+	return inet::NUM_INIT_STAGES;
 }
 
 void Middleware::initialize(int stage)
 {
-	switch (stage) {
-		case 0:
-			initializeMiddleware();
-			break;
-		case 1:
-			initializeServices();
-			break;
-		case 2: {
-				// start update cycle with random jitter to avoid unrealistic node synchronization
-				const auto jitter = uniform(SimTime(0, SIMTIME_MS), mUpdateInterval);
-				scheduleAt(simTime() + jitter + mUpdateInterval, mUpdateMessage);
-				scheduleRuntime();
-			}
-			break;
-		default:
-			break;
+	if (stage == inet::INITSTAGE_NETWORK_LAYER) {
+		initializeMiddleware();
+	}
+	else if (stage == inet::INITSTAGE_APPLICATION_LAYER) {
+		initializeServices();
+		// start update cycle with random jitter to avoid unrealistic node synchronization
+		const auto jitter = uniform(SimTime(0, SIMTIME_MS), mUpdateInterval);
+		scheduleAt(simTime() + jitter + mUpdateInterval, mUpdateMessage);
+		scheduleRuntime();
 	}
 }
 

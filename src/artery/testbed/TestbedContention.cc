@@ -1,5 +1,7 @@
 #include "artery/testbed/TestbedContention.h"
 
+using namespace omnetpp;
+
 namespace artery
 {
 

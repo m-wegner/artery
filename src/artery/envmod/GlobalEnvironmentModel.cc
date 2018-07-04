@@ -20,6 +20,8 @@
 #include <algorithm>
 #include <array>
 
+using namespace omnetpp;
+
 using LineOfSight = std::array<Position, 2>;
 BOOST_GEOMETRY_REGISTER_LINESTRING(LineOfSight)
 

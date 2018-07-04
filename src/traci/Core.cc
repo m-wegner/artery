@@ -9,9 +9,9 @@ Define_Module(traci::Core)
 
 namespace
 {
-const simsignal_t initSignal = omnetpp::cComponent::registerSignal("traci.init");
-const simsignal_t stepSignal = omnetpp::cComponent::registerSignal("traci.step");
-const simsignal_t closeSignal = omnetpp::cComponent::registerSignal("traci.close");
+const omnetpp::simsignal_t initSignal = omnetpp::cComponent::registerSignal("traci.init");
+const omnetpp::simsignal_t stepSignal = omnetpp::cComponent::registerSignal("traci.step");
+const omnetpp::simsignal_t closeSignal = omnetpp::cComponent::registerSignal("traci.close");
 }
 
 namespace traci
@@ -40,7 +40,7 @@ void Core::initialize()
 
 void Core::finish()
 {
-    emit(closeSignal, simTime());
+    emit(closeSignal, omnetpp::simTime());
     if (!m_connectEvent->isScheduled()) {
         m_traci->close();
     }
@@ -53,18 +53,18 @@ void Core::handleMessage(omnetpp::cMessage* msg)
         if (m_subscriptions) {
             m_subscriptions->step();
         }
-        emit(stepSignal, simTime());
+        emit(stepSignal, omnetpp::simTime());
 
         if (!m_stopping || m_traci->simulation.getMinExpectedNumber() > 0) {
-            scheduleAt(simTime() + m_updateInterval, m_updateEvent);
+            scheduleAt(omnetpp::simTime() + m_updateInterval, m_updateEvent);
         }
     } else if (msg == m_connectEvent) {
         m_traci->connect(m_launcher->launch());
         checkVersion();
         syncTime();
-        emit(initSignal, simTime());
+        emit(initSignal, omnetpp::simTime());
         m_updateInterval = time_cast(m_traci->simulation.getDeltaT());
-        scheduleAt(simTime() + m_updateInterval, m_updateEvent);
+        scheduleAt(omnetpp::simTime() + m_updateInterval, m_updateEvent);
     }
 }
 
@@ -73,26 +73,26 @@ void Core::checkVersion()
     int expected = par("version");
     if (expected == 0) {
         expected = constants::TRACI_VERSION;
-        EV_INFO << "Defaulting expected TraCI API level to client API version " << expected << endl;
+        EV_INFO << "Defaulting expected TraCI API level to client API version " << expected << std::endl;
     }
 
     const auto actual = m_traci->getVersion();
-    EV_INFO << "TraCI server is " << actual.second << " with API level " << actual.first << endl;
+    EV_INFO << "TraCI server is " << actual.second << " with API level " << actual.first << std::endl;
 
     if (expected < 0) {
-        EV_DEBUG << "No specific TraCI server version requested, accepting connection..." << endl;
+        EV_DEBUG << "No specific TraCI server version requested, accepting connection..." << std::endl;
     } else if (expected != actual.first) {
-        EV_FATAL << "Reported TraCI server version does not match expected version " << expected << endl;
-        throw cRuntimeError("TraCI server version mismatch (expected: %i, actual: %i)", expected, actual.first);
+        EV_FATAL << "Reported TraCI server version does not match expected version " << expected << std::endl;
+        error("TraCI server version mismatch (expected: %i, actual: %i)", expected, actual.first);
     }
 }
 
 void Core::syncTime()
 {
-    const omnetpp::SimTime now = simTime();
-    ASSERT(now.remainderForUnit(SIMTIME_MS).isZero());
+    const omnetpp::SimTime now = omnetpp::simTime();
+    ASSERT(now.remainderForUnit(omnetpp::SIMTIME_MS).isZero());
     if (!now.isZero()) {
-        m_traci->simulationStep(now.inUnit(SIMTIME_MS));
+        m_traci->simulationStep(now.inUnit(omnetpp::SIMTIME_MS));
     }
 }
 

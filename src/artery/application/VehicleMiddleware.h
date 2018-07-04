@@ -29,7 +29,7 @@ class VehicleMiddleware : public Middleware
 		void initializeVehicleController();
 		void updatePosition();
 
-		traci::VehicleController* mVehicleController;
+		traci::VehicleController* mVehicleController = nullptr;
 		VehicleDataProvider mVehicleDataProvider;
 };
 
